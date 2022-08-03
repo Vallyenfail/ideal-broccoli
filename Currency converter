@@ -1,0 +1,43 @@
+import json as j
+import requests as r
+import ast
+
+
+def exchange():
+    print('Checking the cache...')
+    with open('currency_rates.txt', 'r+') as read:
+        flag = False
+        for line in read.readlines():
+            rates = []
+            lines = line.rstrip()
+            lines = ast.literal_eval(lines)
+            rates.append(lines)
+            if lines['code'] == exchange_currency.upper():
+                flag = True
+                print('Oh! It is in the cache!')
+                print(f'You received {round(lines["rate"] * dinero, 2)} {exchange_currency.upper()}.')
+        if flag is False:
+            print('Sorry, but it is not in the cache!')
+            read.write(str(json_format[f'{exchange_currency}']) + '\n')
+            print(f'You received {round(json_format[f"{exchange_currency}"]["rate"] * dinero, 2)} {exchange_currency.upper()}.')
+
+
+currency_you_have = input()
+req = r.get(f'http://www.floatrates.com/daily/{currency_you_have}.json')
+json_format = j.loads(req.text)
+
+with open('currency_rates.txt', 'w') as o:
+    if currency_you_have.upper() != 'USD':
+        o.write(str(json_format['usd']) + '\n')
+    if currency_you_have.upper() != 'EUR':
+        o.write(str(json_format['eur']) + '\n')
+
+process = True
+while process:
+    exchange_currency = input()
+    if exchange_currency == '':
+        break
+    dinero = int(input())
+    exchange()
+
+
